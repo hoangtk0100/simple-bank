@@ -50,8 +50,8 @@ func (store *Store) execTx(ctx context.Context, fn func(*Queries) error) error {
 
 // TransferTxParams contains the input parameters of the transfer transaction
 type TransferTxParams struct {
-	FromAccountId int64 `json:"from_account_id"`
-	ToAccountId   int64 `json:"to_account_id"`
+	FromAccountID int64 `json:"from_account_id"`
+	ToAccountID   int64 `json:"to_account_id"`
 	Amount        int64 `json:"amount"`
 }
 
@@ -80,26 +80,15 @@ func (store *Store) TransferTx(ctx context.Context, arg TransferTxParams) (Trans
 		// txName := ctx.Value(txKey)
 
 		result.Transfer, err = q.CreateTransfer(ctx, CreateTransferParams{
-			FromAccountID: arg.FromAccountId,
-			ToAccountID:   arg.ToAccountId,
+			FromAccountID: arg.FromAccountID,
+			ToAccountID:   arg.ToAccountID,
 			Amount:        arg.Amount,
 		})
 		if err != nil {
 			return err
 		}
 
-		result.FromEntry, err = q.CreateEntry(ctx, CreateEntryParams{
-			AccountID: arg.FromAccountId,
-			Amount:    -arg.Amount,
-		})
-		if err != nil {
-			return err
-		}
-
-		result.ToEntry, err = q.CreateEntry(ctx, CreateEntryParams{
-			AccountID: arg.ToAccountId,
-			Amount:    arg.Amount,
-		})
+		result.FromEntry, result.ToEntry, err = createEntries(ctx, q, arg.FromAccountID, arg.ToAccountID, arg.Amount)
 		if err != nil {
 			return err
 		}
@@ -107,35 +96,28 @@ func (store *Store) TransferTx(ctx context.Context, arg TransferTxParams) (Trans
 		// Get account => update its balance
 
 		/*
-		//! Use 2 queries for getting and updating is not too good
-		//! => Use only 1 query for changing the account balance
-			account1, err := q.GetAccountForUpdate(ctx, arg.FromAccountId)
-			if err != nil {
-				return err
-			}
+			//! Use 2 queries for getting and updating is not too good
+			//! => Use only 1 query for changing the account balance
+				account1, err := q.GetAccountForUpdate(ctx, arg.FromAccountId)
+				if err != nil {
+					return err
+				}
 
-			result.FromAccount, err = q.UpdateAccount(ctx, UpdateAccountParams{
-				ID:      arg.FromAccountId,
-				Balance: account1.Balance - arg.Amount,
-			})
-			if err != nil {
-				return err
-			}
+				result.FromAccount, err = q.UpdateAccount(ctx, UpdateAccountParams{
+					ID:      arg.FromAccountId,
+					Balance: account1.Balance - arg.Amount,
+				})
+				if err != nil {
+					return err
+				}
 		*/
 
-
-		result.FromAccount, err = q.AddAccountBalance(ctx, AddAccountBalanceParams{
-			ID:     arg.FromAccountId,
-			Amount: -arg.Amount,
-		})
-		if err != nil {
-			return err
+		// Avoid DB deadlock : query order matter
+		if arg.FromAccountID < arg.ToAccountID {
+			result.FromAccount, result.ToAccount, err = addMoney(ctx, q, arg.FromAccountID, -arg.Amount, arg.ToAccountID, arg.Amount)
+		} else {
+			result.ToAccount, result.FromAccount, err = addMoney(ctx, q, arg.ToAccountID, arg.Amount, arg.FromAccountID, -arg.Amount)
 		}
-
-		result.ToAccount, err = q.AddAccountBalance(ctx, AddAccountBalanceParams{
-			ID:     arg.ToAccountId,
-			Amount: arg.Amount,
-		})
 		if err != nil {
 			return err
 		}
@@ -144,4 +126,52 @@ func (store *Store) TransferTx(ctx context.Context, arg TransferTxParams) (Trans
 	})
 
 	return result, err
+}
+
+func createEntries(
+	ctx context.Context,
+	q *Queries,
+	fromAccountID int64,
+	toAccountID int64,
+	amount int64,
+) (fromEntry, toEntry Entry, err error) {
+	fromEntry, err = q.CreateEntry(ctx, CreateEntryParams{
+		AccountID: fromAccountID,
+		Amount:    -amount,
+	})
+	if err != nil {
+		return
+	}
+
+	toEntry, err = q.CreateEntry(ctx, CreateEntryParams{
+		AccountID: toAccountID,
+		Amount:    amount,
+	})
+	
+	return
+}
+
+func addMoney(
+	ctx context.Context,
+	q *Queries,
+	accountID1 int64,
+	amount1 int64,
+	accountID2 int64,
+	amount2 int64,
+) (account1, account2 Account, err error) {
+	account1, err = q.AddAccountBalance(ctx, AddAccountBalanceParams{
+		ID:     accountID1,
+		Amount: amount1,
+	})
+	if err != nil {
+		// the same as: return account1, account2, err
+		return
+	}
+
+	account2, err = q.AddAccountBalance(ctx, AddAccountBalanceParams{
+		ID:     accountID2,
+		Amount: amount2,
+	})
+
+	return
 }
