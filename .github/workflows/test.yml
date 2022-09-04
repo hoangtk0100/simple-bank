@@ -1,4 +1,4 @@
-name: Go
+name: Run Unit Tests
 
 on:
   push:
@@ -13,11 +13,13 @@ jobs:
 
     services:
       postgres:
-        image: postgres:14
+        image: postgres:14-alpine
         env:
           POSTGRES_USER: root
           POSTGRES_PASSWORD: secret
           POSTGRES_DB: simple_bank
+        ports:
+          - 5432:5432
         # Set health checks to wait until postgres has started
         options: >-
           --health-cmd pg_isready
@@ -28,10 +30,16 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Set up Go
+      - name: Set up Go 1.x
         uses: actions/setup-go@v3
         with:
-          go-version: 1.18
+          go-version: ^1.19
+        id: go
+
+      - name: Install golang-migrate
+        run: |
+          curl -L https://github.com/golang-migrate/migrate/releases/download/v4.15.2/migrate.linux-amd64.tar.gz | tar xvz
+          mv migrate /usr/bin/
 
       - name: Run migrations
         run: make migrateup
