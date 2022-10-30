@@ -2,6 +2,7 @@ package api
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	db "github.com/hoangtk0100/simple-bank/db/sqlc"
@@ -17,9 +18,11 @@ type createUserRequest struct {
 }
 
 type createUserResponse struct {
-	Username string `json:"username"`
-	FullName string `json:"full_name"`
-	Email    string `json:"email"`
+	Username          string    `json:"username"`
+	FullName          string    `json:"full_name"`
+	Email             string    `json:"email"`
+	PasswordChangedAt time.Time `json:"password_changed_at"`
+	CreatedAt         time.Time `json:"created_at"`
 }
 
 func (server *Server) createUser(ctx *gin.Context) {
@@ -56,9 +59,11 @@ func (server *Server) createUser(ctx *gin.Context) {
 	}
 
 	rsp := createUserResponse{
-		Username: user.Username,
-		FullName: user.FullName,
-		Email:    user.Email,
+		Username:          user.Username,
+		FullName:          user.FullName,
+		Email:             user.Email,
+		PasswordChangedAt: user.PasswordChangedAt,
+		CreatedAt:         user.CreatedAt,
 	}
 
 	ctx.JSON(http.StatusOK, rsp)
