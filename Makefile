@@ -5,6 +5,9 @@ DB_HOST=localhost
 DB_PORT=5433
 DB_SOURCE=postgresql://root:secret@$(DB_HOST):$(DB_PORT)/$(DB_NAME)?sslmode=disable
 
+network:
+	docker network create bank-network
+
 postgres:
 	docker run --name $(DB_CONTAINER_NAME) --network bank-network -p $(DB_PORT):5432 -e POSTGRES_USER=root -e POSTGRES_PASSWORD=secret -d $(PSQL_IMAGE)
 
@@ -47,4 +50,4 @@ server:
 mock:
 	mockgen -package mockdb -destination db/mock/store.go github.com/hoangtk0100/simple-bank/db/sqlc Store
 
-.PHONY: postgres createdb dropdb db migrate migrateup migratedown migrateup1 migratedown1 sqlc test server mock
+.PHONY: network postgres createdb dropdb db migrate migrateup migratedown migrateup1 migratedown1 sqlc test server mock
