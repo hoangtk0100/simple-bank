@@ -44,7 +44,8 @@ func (server *Server) setupRouter() {
 	router := gin.Default()
 
 	// Add routes to router
-	router.POST("/oauth/login", server.loginUser)
+	router.POST("/oauth/login", server.login)
+	router.POST("/oauth/tokens/renew", server.renewAccessToken)
 
 	router.POST("/users", server.createUser)
 
