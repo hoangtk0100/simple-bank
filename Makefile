@@ -38,6 +38,12 @@ migratedown:
 migratedown1:
 	migrate -path db/migration -database "$(DB_SOURCE)" -verbose down 1
 
+db_docs:
+	dbdocs build docs/db.dbml
+
+db_schema:
+	dbml2sql --posgres -o docs/schema.sql docs/db.dbml
+
 sqlc:
 	sqlc generate
 
@@ -50,4 +56,4 @@ server:
 mock:
 	mockgen -package mockdb -destination db/mock/store.go github.com/hoangtk0100/simple-bank/db/sqlc Store
 
-.PHONY: network postgres createdb dropdb db migrate migrateup migratedown migrateup1 migratedown1 sqlc test server mock
+.PHONY: network postgres createdb dropdb db migrate migrateup migratedown migrateup1 migratedown1 db_docs db_schema  sqlc test server mock
