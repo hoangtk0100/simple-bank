@@ -19,6 +19,7 @@ services:
       # - DB_PORT=5432
     ports:
       - "8088:8088"
+      - "9099:9099"
     depends_on:
       - postgres
     entrypoint: 
