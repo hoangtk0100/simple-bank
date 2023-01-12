@@ -10,10 +10,12 @@ import (
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/hoangtk0100/simple-bank/api"
 	db "github.com/hoangtk0100/simple-bank/db/sqlc"
+	_ "github.com/hoangtk0100/simple-bank/docs/statik"
 	"github.com/hoangtk0100/simple-bank/gapi"
 	"github.com/hoangtk0100/simple-bank/pb"
 	"github.com/hoangtk0100/simple-bank/util"
 	_ "github.com/lib/pq"
+	"github.com/rakyll/statik/fs"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 	"google.golang.org/protobuf/encoding/protojson"
@@ -73,9 +75,20 @@ func runGatewayServer(config util.Config, store db.Store) {
 	// To convert HTTP request to gRPC format, reroute them to the gRPC mux
 	mux.Handle("/", grpcMux)
 
-	// Serve swagger requests
-	fs := http.FileServer((http.Dir("./docs/swagger")))
-	mux.Handle("/swagger/", http.StripPrefix("/swagger/", fs))
+	// Serve swagger requests from files in directory
+	// fs := http.FileServer(http.Dir("./docs/swagger"))
+	// mux.Handle("/swagger/", http.StripPrefix("/swagger/", fs))
+
+	// Serve swagger from statik binary file
+	// New() use default namespace
+	// NewWithNamespace() for using custom namespace
+	statikFS, err := fs.New()
+	if err != nil {
+		log.Fatal("can not create statik fs:", err)
+	}
+
+	swaggerHandler := http.StripPrefix("/swagger/", http.FileServer(statikFS))
+	mux.Handle("/swagger/", swaggerHandler)
 
 	listener, err := net.Listen("tcp", config.HTTPServerAddress)
 	if err != nil {
