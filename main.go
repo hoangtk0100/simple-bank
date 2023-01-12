@@ -73,6 +73,10 @@ func runGatewayServer(config util.Config, store db.Store) {
 	// To convert HTTP request to gRPC format, reroute them to the gRPC mux
 	mux.Handle("/", grpcMux)
 
+	// Serve swagger requests
+	fs := http.FileServer((http.Dir("./docs/swagger")))
+	mux.Handle("/swagger/", http.StripPrefix("/swagger/", fs))
+
 	listener, err := net.Listen("tcp", config.HTTPServerAddress)
 	if err != nil {
 		log.Fatal("can not create listener:", err)
