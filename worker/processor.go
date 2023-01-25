@@ -3,6 +3,8 @@ package worker
 import (
 	"context"
 
+	"github.com/rs/zerolog/log"
+
 	"github.com/hibiken/asynq"
 	db "github.com/hoangtk0100/simple-bank/db/sqlc"
 )
@@ -32,6 +34,10 @@ func NewRedisTaskProcessor(redisOpt asynq.RedisClientOpt, store db.Store) TaskPr
 				QueueDefault:  5,
 				QueueLow:      1,
 			},
+			ErrorHandler: asynq.ErrorHandlerFunc(func(ctx context.Context, task *asynq.Task, err error) {
+				log.Error().Err(err).Str("type", task.Type()).Bytes("payload", task.Payload()).Msg("process task failed")
+			}),
+			Logger: NewLogger(),
 		},
 	)
 
