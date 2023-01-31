@@ -15,4 +15,4 @@ spec:
       protocol: TCP
       port: 9099
       targetPort: 9099
-  type: LoadBalancer
+  type: ClusterIP
