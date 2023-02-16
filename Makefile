@@ -4,12 +4,13 @@ DB_NAME=simple_bank
 DB_HOST=localhost
 DB_PORT=5433
 DB_SOURCE=postgresql://root:secret@$(DB_HOST):$(DB_PORT)/$(DB_NAME)?sslmode=disable
+NETWORK_NAME=bank-network
 
 network:
-	docker network create bank-network
+	docker network create $(NETWORK_NAME)
 
 postgres:
-	docker run --name $(DB_CONTAINER_NAME) --network bank-network -p $(DB_PORT):5432 -e POSTGRES_USER=root -e POSTGRES_PASSWORD=secret -d $(PSQL_IMAGE)
+	docker run --name $(DB_CONTAINER_NAME) --network $(NETWORK_NAME) -p $(DB_PORT):5432 -e POSTGRES_USER=root -e POSTGRES_PASSWORD=secret -d $(PSQL_IMAGE)
 
 mysql:
 	docker run --name mysql8 -p 3306:3306 -e MYSQL_ROOT_PASSWORD=secret -d mysql:8
