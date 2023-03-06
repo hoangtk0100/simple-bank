@@ -24,7 +24,7 @@ dropdb:
 db:
 	docker exec -it $(DB_CONTAINER_NAME) psql -U root $(DB_NAME)
 
-migrate:
+new_migration:
 	migrate create -ext sql -dir db/migration -seq $(name)
 
 migrateup:
@@ -73,4 +73,4 @@ evans:
 redis:
 	docker run --name redis -e REDIS_PASSWORD=secret -p 6379:6379 -d redis:7-alpine --requirepass secret
 
-.PHONY: network postgres createdb dropdb db migrate migrateup migratedown migrateup1 migratedown1 db_docs db_schema  sqlc test server mock proto evans redis
+.PHONY: network postgres createdb dropdb db new_migration migrateup migratedown migrateup1 migratedown1 db_docs db_schema  sqlc test server mock proto evans redis

@@ -19,6 +19,7 @@ import (
 	db "github.com/hoangtk0100/simple-bank/db/sqlc"
 	_ "github.com/hoangtk0100/simple-bank/docs/statik"
 	"github.com/hoangtk0100/simple-bank/gapi"
+	"github.com/hoangtk0100/simple-bank/mail"
 	"github.com/hoangtk0100/simple-bank/pb"
 	"github.com/hoangtk0100/simple-bank/util"
 	"github.com/hoangtk0100/simple-bank/worker"
@@ -57,7 +58,7 @@ func main() {
 
 	// runTaskProcessor in a separate go routine
 	// Because when the processor starts, the Asynq server will block and keep polling Redis for new tasks
-	go runTaskProcessor(redisOpt, store)
+	go runTaskProcessor(config, redisOpt, store)
 
 	// Can not call both runGrpcServer, runGinServer for serving both GRPC and HTTP requests in the same go routine
 	// so run 1 of them in the seperate go routine, not blocking each other from starting
@@ -78,8 +79,9 @@ func runDBMigration(migrationURL string, dbSource string) {
 	log.Info().Msg("db migrated successfully")
 }
 
-func runTaskProcessor(redisOpt asynq.RedisClientOpt, store db.Store) {
-	taskProcessor := worker.NewRedisTaskProcessor(redisOpt, store)
+func runTaskProcessor(config util.Config, redisOpt asynq.RedisClientOpt, store db.Store) {
+	mailer := mail.NewGmailSender(config.EmailSenderName, config.EmailSenderAddress, config.EmailSenderPassword)
+	taskProcessor := worker.NewRedisTaskProcessor(redisOpt, store, mailer)
 	log.Info().Msg("start task processor")
 
 	err := taskProcessor.Start()
