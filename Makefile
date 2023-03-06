@@ -1,10 +1,5 @@
-PSQL_IMAGE=postgres:14-alpine
-DB_CONTAINER_NAME=postgres14
-DB_NAME=simple_bank
-DB_HOST=localhost
-DB_PORT=5433
-DB_SOURCE=postgresql://root:secret@$(DB_HOST):$(DB_PORT)/$(DB_NAME)?sslmode=disable
-NETWORK_NAME=bank-network
+include app.env
+export
 
 network:
 	docker network create $(NETWORK_NAME)
