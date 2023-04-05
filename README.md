@@ -1,21 +1,27 @@
 GO - Simple bank
 # GO - Simple Bank Service
-This service will provide APIs for the Frontend to do following things:
+This service implements these main features:
 
-1. Create and manage bank accounts.
+1. Create and manage users and its bank accounts.
 2. Record all balance changes to each of the accounts.
-3. Perform a money transfer between 2 accounts.
+3. Perform money transactions between the accounts.
 
 Infrastructure:
-- Manage migrations: `golang-migrate`
+- Database migrations: `golang-migrate`
 - Generate CRUD code from SQL: `sqlc`
 - Database: `postgreSQL`
 - Mock database for testing: `gomock`
-- Manage database documentation: `dbdocs`
+- Database documentation: `dbdocs`
 - Generate SQL schema: `dbml2sql`
+- Queue: `Redis`
+- Web framework: `Gin`
+- RPC framework: `gRPC`
+- API gateway supports both HTTP and gRPC request: `grpc-gateway`
 - CI/CD: `github-action`
 - Package and distribute software applications as lightweight containers: `docker`
-- Deploy to K8S: `AWS EKS`
+- Deployment: `Kubernetes`
+- AWS services: `IAM - ECR - RDS - Secrets Manager - EKS - Route53`
+- TLS: `Let's Encrypt`
 
 ## Setup local development
 
@@ -103,7 +109,7 @@ Infrastructure:
     make db_docs
     ```
 
-- Access the DB documentation at [this address](https://dbdocs.io/hoangtk.0100/go_healthy). Password: `hoangtk`
+- Access the DB documentation at [this address](https://dbdocs.io/hoangtk.0100/simple_bank). Password: `hoangtk`
 
 ### How to generate code
 
