@@ -61,7 +61,7 @@ func main() {
 	go runTaskProcessor(config, redisOpt, store)
 
 	// Can not call both runGrpcServer, runGinServer for serving both GRPC and HTTP requests in the same go routine
-	// so run 1 of them in the seperate go routine, not blocking each other from starting
+	// so run 1 of them in the separate go routine, not blocking each other from starting
 	go runGatewayServer(config, store, taskDistributor)
 	runGrpcServer(config, store, taskDistributor)
 }
@@ -110,7 +110,7 @@ func runGatewayServer(config util.Config, store db.Store, taskDistributor worker
 	grpcMux := runtime.NewServeMux(jsonOption)
 
 	ctx, cancel := context.WithCancel(context.Background())
-	// only excuted before exiting this runGatewayServer function
+	// only executed before exiting this runGatewayServer function
 	// cancelling a context is a way to prevent the system from doing unnecessary works
 	defer cancel()
 
