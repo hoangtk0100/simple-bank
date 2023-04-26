@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-const alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+const alphabet = "abcdefghijklmnopqrstuvwxyz"
 
 // init is called automatically when the package is first used
 func init() {

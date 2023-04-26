@@ -59,7 +59,7 @@ Infrastructure:
 
 ### Setup infrastructure
 
-- Create the healthy-network
+- Create the bank-network
 
     ``` bash
     make network
