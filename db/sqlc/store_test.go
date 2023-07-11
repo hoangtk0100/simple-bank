@@ -9,15 +9,13 @@ import (
 )
 
 /*
-	Deadlock reason:
-		1. Concurrent requests change or retrieve the db records at the same time may get the same balance, not the true balance
-			=> SELECT ... FOR UPDATE: allow only one transaction at a time to interact with the db record
-	 	2. Multiple requests interact with the same record with foreign key constraints, including inserting, and updating other tables having columns are foreign keys
-			=> FOR NO KEY UPDATE: tell the db that other transactions retrieve or change the record column which is not a key
+Deadlock reason:
+ 1. Concurrent requests change or retrieve the db records at the same time may get the same balance, not the true balance
+    => SELECT ... FOR UPDATE: allow only one transaction at a time to interact with the db record
+ 2. Multiple requests interact with the same record with foreign key constraints, including inserting, and updating other tables having columns are foreign keys
+    => FOR NO KEY UPDATE: tell the db that other transactions retrieve or change the record column which is not a key
 */
 func TestTransferTx(t *testing.T) {
-	store := NewStore(testDB)
-
 	account1 := createRandomAccount(t)
 	account2 := createRandomAccount(t)
 	fmt.Println(">> before:", account1.Balance, account2.Balance)
@@ -37,7 +35,7 @@ func TestTransferTx(t *testing.T) {
 			// Pass a value into context
 			// ctx := context.WithValue(context.Background(), txKey, txName)
 			ctx := context.Background()
-			result, err := store.TransferTx(ctx, TransferTxParams{
+			result, err := testStore.TransferTx(ctx, TransferTxParams{
 				FromAccountID: account1.ID,
 				ToAccountID:   account2.ID,
 				Amount:        amount,
@@ -68,7 +66,7 @@ func TestTransferTx(t *testing.T) {
 		require.NotZero(t, transfer.CreatedAt)
 
 		// Check the record
-		_, err = store.GetTransfer(context.Background(), transfer.ID)
+		_, err = testStore.GetTransfer(context.Background(), transfer.ID)
 		require.NoError(t, err)
 
 		// Check the entries
@@ -79,7 +77,7 @@ func TestTransferTx(t *testing.T) {
 		require.NotZero(t, fromEntry.ID)
 		require.NotZero(t, fromEntry.CreatedAt)
 
-		_, err = store.GetEntry(context.Background(), fromEntry.ID)
+		_, err = testStore.GetEntry(context.Background(), fromEntry.ID)
 		require.NoError(t, err)
 
 		toEntry := result.ToEntry
@@ -89,7 +87,7 @@ func TestTransferTx(t *testing.T) {
 		require.NotZero(t, toEntry.ID)
 		require.NotZero(t, toEntry.CreatedAt)
 
-		_, err = store.GetEntry(context.Background(), toEntry.ID)
+		_, err = testStore.GetEntry(context.Background(), toEntry.ID)
 		require.NoError(t, err)
 
 		// Check accounts
@@ -116,10 +114,10 @@ func TestTransferTx(t *testing.T) {
 	}
 
 	// Check the final updated balances
-	updatedAccount1, err := testQueries.GetAccount(context.Background(), account1.ID)
+	updatedAccount1, err := testStore.GetAccount(context.Background(), account1.ID)
 	require.NoError(t, err)
 
-	updatedAccount2, err := testQueries.GetAccount(context.Background(), account2.ID)
+	updatedAccount2, err := testStore.GetAccount(context.Background(), account2.ID)
 	require.NoError(t, err)
 
 	fmt.Println(">> after:", updatedAccount1.Balance, updatedAccount2.Balance)
@@ -128,13 +126,11 @@ func TestTransferTx(t *testing.T) {
 }
 
 /*
-	Deadlock reason:
-		1. Query order - Circular waiting for the ShareLock (The different order in which 2 concurrent transactions update the same account's balance)
-			The transaction 1 updates account 1 before account 2 while the other transaction updates account 2 before account 1
+Deadlock reason:
+ 1. Query order - Circular waiting for the ShareLock (The different order in which 2 concurrent transactions update the same account's balance)
+    The transaction 1 updates account 1 before account 2 while the other transaction updates account 2 before account 1
 */
 func TestTransferTxDeadLock(t *testing.T) {
-	store := NewStore(testDB)
-
 	account1 := createRandomAccount(t)
 	account2 := createRandomAccount(t)
 	fmt.Println(">> before:", account1.Balance, account2.Balance)
@@ -156,7 +152,7 @@ func TestTransferTxDeadLock(t *testing.T) {
 
 		// In the fact, transactions occur concurrently => use goroutines
 		go func() {
-			_, err := store.TransferTx(context.Background(), TransferTxParams{
+			_, err := testStore.TransferTx(context.Background(), TransferTxParams{
 				FromAccountID: fromAccountID,
 				ToAccountID:   toAccountID,
 				Amount:        amount,
@@ -174,10 +170,10 @@ func TestTransferTxDeadLock(t *testing.T) {
 	}
 
 	// Check the final updated balances
-	updatedAccount1, err := testQueries.GetAccount(context.Background(), account1.ID)
+	updatedAccount1, err := testStore.GetAccount(context.Background(), account1.ID)
 	require.NoError(t, err)
 
-	updatedAccount2, err := testQueries.GetAccount(context.Background(), account2.ID)
+	updatedAccount2, err := testStore.GetAccount(context.Background(), account2.ID)
 	require.NoError(t, err)
 
 	fmt.Println(">> after:", updatedAccount1.Balance, updatedAccount2.Balance)
