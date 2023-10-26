@@ -17,8 +17,9 @@ Infrastructure:
 - Web framework: `Gin`
 - RPC framework: `gRPC`
 - API gateway supports both HTTP and gRPC request: `grpc-gateway`
+- API documentation: `Swagger`
 - CI/CD: `github-action`
-- Package and distribute software applications as lightweight containers: `docker`
+- Containerize: `docker`, `docker-compose`
 - Deployment: `Kubernetes`
 - AWS services: `IAM - ECR - RDS - Secrets Manager - EKS - Route53`
 - TLS: `Let's Encrypt`
