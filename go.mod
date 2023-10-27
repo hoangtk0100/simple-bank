@@ -1,6 +1,6 @@
 module github.com/hoangtk0100/simple-bank
 
-go 1.19
+go 1.21
 
 require (
 	github.com/aead/chacha20poly1305 v0.0.0-20170617001512-233f39982aeb
@@ -19,7 +19,7 @@ require (
 	github.com/rs/zerolog v1.15.0
 	github.com/spf13/viper v1.12.0
 	github.com/stretchr/testify v1.8.1
-	golang.org/x/crypto v0.9.0
+	golang.org/x/crypto v0.14.0
 	google.golang.org/genproto v0.0.0-20221207170731-23e4bf6bdc37
 	google.golang.org/grpc v1.51.0
 	google.golang.org/grpc/cmd/protoc-gen-go-grpc v1.2.0
@@ -59,6 +59,7 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/robfig/cron/v3 v3.0.1 // indirect
+	github.com/rogpeppe/go-internal v1.9.0 // indirect
 	github.com/spf13/afero v1.8.2 // indirect
 	github.com/spf13/cast v1.5.0 // indirect
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
@@ -66,10 +67,10 @@ require (
 	github.com/subosito/gotenv v1.3.0 // indirect
 	github.com/ugorji/go/codec v1.2.9 // indirect
 	go.uber.org/atomic v1.7.0 // indirect
-	golang.org/x/net v0.10.0 // indirect
-	golang.org/x/sync v0.1.0 // indirect
-	golang.org/x/sys v0.8.0 // indirect
-	golang.org/x/text v0.9.0 // indirect
+	golang.org/x/net v0.16.0 // indirect
+	golang.org/x/sync v0.4.0 // indirect
+	golang.org/x/sys v0.13.0 // indirect
+	golang.org/x/text v0.13.0 // indirect
 	golang.org/x/time v0.0.0-20220224211638-0e9765cccd65 // indirect
 	gopkg.in/ini.v1 v1.66.4 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
